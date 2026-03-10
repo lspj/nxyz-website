@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>共鸣星海 | 内心宇宙</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/animations.css" />
+    <style>
+      /* 银河容器新样式 */
+      .galaxy-container {
+        padding: 20px 0;
+        height: calc(100vh - 120px); /* 留出导航和页脚空间 */
+        overflow: hidden; /* 隐藏画布溢出的部分 */
+        position: relative;
+      }
+
+      .galaxy-header {
+        text-align: center;
+        margin-bottom: 30px;
+        z-index: 10;
+        position: relative;
+        background: rgba(15, 15, 35, 0.7);
+        padding: 15px;
+        border-radius: var(--border-radius);
+        backdrop-filter: blur(5px);
+      }
+
+      .galaxy-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .galaxy-controls {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        z-index: 10;
+        position: relative;
+      }
+
+      .control-btn {
+        padding: 10px 20px;
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.9rem;
+      }
+
+      .control-btn.active,
+      .control-btn:hover {
+        background: var(--primary-color);
+        transform: translateY(-2px);
+      }
+
+      /* 无限画布 - 核心 */
+      .galaxy-canvas-container {
+        position: absolute;
+        top: 180px; /* 给标题和控制栏留出空间 */
+        left: 0;
+        width: 100%;
+        height: calc(100% - 200px);
+        overflow: hidden;
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(108, 99, 255, 0.2);
+      }
+
+      #galaxyCanvas {
+        width: 3000px; /* 巨大的虚拟画布 */
+        height: 3000px;
+        position: relative;
+        background: rgba(5, 5, 15, 0.95);
+        cursor: grab;
+        transition: transform 0.1s linear; /* 用于拖拽 */
+      }
+      #galaxyCanvas:active {
+        cursor: grabbing;
+      }
+
+      /* 星星基础样式 */
+      .star {
+        position: absolute;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: var(--transition);
+        transform-origin: center;
+      }
+      .star:hover {
+        transform: scale(1.8);
+        z-index: 5;
+      }
+      .star.playing {
+        animation: pulse 2s infinite !important;
+        z-index: 100 !important;
+      }
+
+      /* 当前播放提示条 */
+      #nowPlayingSimple {
+        background: rgba(20, 20, 35, 0.95);
+        border-radius: var(--border-radius);
+        padding: 12px 20px;
+        margin: 15px auto;
+        backdrop-filter: blur(10px);
+        border-left: 4px solid var(--primary-color);
+        max-width: 800px;
+        display: none;
+        z-index: 10;
+        position: relative;
+      }
+
+      /* 返回按钮 */
+      .back-btn {
+        display: inline-block;
+        margin-top: 20px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        z-index: 10;
+        position: relative;
+        background: var(--card-bg);
+        padding: 10px 20px;
+        border-radius: 20px;
+      }
+      .back-btn:hover {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      /* 脉冲动画 */
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 20px 5px hsla(60, 100%, 50%, 0.8);
+        }
+        50% {
+          box-shadow: 0 0 30px 10px hsla(60, 100%, 50%, 0.9);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="main-nav">
+        <div class="nav-brand">内心宇宙</div>
+        <ul class="nav-links">
+          <li><a href="../index.html">主页</a></li>
+          <li><a href="music-galaxy.html" class="active">共鸣星海</a></li>
+          <!-- 修改了导航名称 -->
+          <li><a href="anxiety-room.html">情绪空间</a></li>
+          <li><a href="memory-drawers.html">记忆抽屉</a></li>
+          <li><a href="portrait-lab.html">肖像实验室</a></li>
+          <li><a href="about-me.html">关于我</a></li>
+        </ul>
+        <button class="menu-toggle">☰</button>
+      </nav>
+
+      <main class="galaxy-container">
+        <div class="galaxy-header">
+          <h1>共鸣星海</h1>
+          <p>
+            一片由无数同好用歌曲点亮的无限宇宙。点击星辰，聆听音乐，结识知音。
+          </p>
+          <!-- 修改了副标题 -->
+        </div>
+
+        <div class="galaxy-controls">
+          <button class="control-btn active" data-filter="all">全部星辰</button>
+          <button class="control-btn" data-filter="energy">活力节拍</button>
+          <button class="control-btn" data-filter="quiet">静谧时光</button>
+          <button class="control-btn" data-filter="social-tech">
+            寻找技术同好
+          </button>
+          <!-- 新增社交筛选 -->
+          <button class="control-btn" data-filter="social-game">
+            寻找游戏玩伴
+          </button>
+        </div>
+
+        <!-- 当前播放简单提示 -->
+        <div id="nowPlayingSimple" style="display: none">
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="color: var(--primary-color); font-size: 1.2rem"
+              >▶</span
+            >
+            <div>
+              <div
+                style="font-weight: 600; color: var(--text-primary)"
+                id="currentSongSimple"
+              >
+                点击星星播放音乐
+              </div>
+              <div
+                style="font-size: 0.8rem; color: var(--text-secondary)"
+                id="currentArtistSimple"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 无限星海画布容器 -->
+        <div class="galaxy-canvas-container">
+          <div class="galaxy-canvas" id="galaxyCanvas">
+            <!-- 星星将通过 galaxy.js 动态生成在这里 -->
+          </div>
+        </div>
+
+        <!-- 隐藏的音频播放器 -->
+        <audio
+          id="audioPlayer"
+          preload="metadata"
+          style="display: none"
+        ></audio>
+
+        <a href="../index.html" class="back-btn">← 返回主页</a>
+      </main>
+
+      <footer>
+        <p>© 2025 内心宇宙 | 网页设计大赛参赛作品 - 共鸣星海模块</p>
+        <p>每一颗星都是一个故事，一次相遇的契机。</p>
+      </footer>
+    </div>
+
+    <!-- 脚本引入 -->
+    <script src="../js/main.js"></script>
+    <script src="../js/galaxy.js"></script>
+    <!-- 这个文件将被完全替换 -->
+  </body>
+</html>
